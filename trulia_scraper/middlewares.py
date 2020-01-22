@@ -6,6 +6,7 @@
 # https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 
 from scrapy import signals
+import base64
 
 
 class TruliaScraperSpiderMiddleware(object):
@@ -101,3 +102,9 @@ class TruliaScraperDownloaderMiddleware(object):
 
     def spider_opened(self, spider):
         spider.logger.info('Spider opened: %s' % spider.name)
+
+
+class CustomProxyMiddleware(object):
+    def process_request(self, request, spider):
+        # Set the location of the proxy
+        request.meta['proxy'] = "http://lum-customer-hl_00eb694c-zone-static:63hv8ubbyc8t@zproxy.lum-superproxy.io:22225"

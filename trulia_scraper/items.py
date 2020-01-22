@@ -8,12 +8,20 @@ from .parsing import remove_empty, get_number_from_string
 class TruliaItem(scrapy.Item):
     url = scrapy.Field()
     address = scrapy.Field()
+    latitude = scrapy.Field()
+    longitude = scrapy.Field()
+    mls = scrapy.Field()
     city = scrapy.Field()
     state = scrapy.Field()
     price = scrapy.Field()              # for items on sale only
     neighborhood = scrapy.Field()
     # overview = scrapy.Field()
     description = scrapy.Field()
+
+    listing_agency = scrapy.Field()
+    listing_agency_phone = scrapy.Field()
+    agent_name = scrapy.Field()
+    agent_phone_num = scrapy.Field()
 
     # Columns from the 'price events' table are stored in separate lists
     # prices = scrapy.Field()
@@ -38,14 +46,14 @@ class TruliaItem(scrapy.Item):
     # Items generated from further parsing of 'raw' scraped data
     area = scrapy.Field()
     lot_size = scrapy.Field()
-    lot_size_units = scrapy.Field()
+    # lot_size_units = scrapy.Field()
     price_per_square_foot = scrapy.Field()      # For properties on sale only
     bedrooms = scrapy.Field()
     bathrooms = scrapy.Field()
     year_built = scrapy.Field()
     days_on_Trulia = scrapy.Field()
     # views = scrapy.Field()
-    price_history = scrapy.Field()
+    # price_history = scrapy.Field()
 
 
 class TruliaItemLoader(ItemLoader):

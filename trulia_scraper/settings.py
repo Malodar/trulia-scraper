@@ -14,12 +14,14 @@ BOT_NAME = 'trulia_scraper'
 SPIDER_MODULES = ['trulia_scraper.spiders']
 NEWSPIDER_MODULE = 'trulia_scraper.spiders'
 LOG_LEVEL = 'INFO'
+FEED_EXPORT_FIELDS = ["address", "latitude", "longitude", 'price', 'area', 'price_per_square_foot', 'mls', 'url',
+                      'description', 'agent_name', 'agent_phone_num', 'listing_agency', 'listing_agency_phone']
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'trulia_scraper (+http://www.yourdomain.com)'
 
 # Obey robots.txt rules
-ROBOTSTXT_OBEY = True
+ROBOTSTXT_OBEY = False
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 #CONCURRENT_REQUESTS = 32
@@ -27,7 +29,7 @@ ROBOTSTXT_OBEY = True
 # Configure a delay for requests for the same website (default: 0)
 # See https://docs.scrapy.org/en/latest/topics/settings.html#download-delay
 # See also autothrottle settings and docs
-#DOWNLOAD_DELAY = 3
+DOWNLOAD_DELAY = 0.5
 # The download delay setting will honor only one of:
 #CONCURRENT_REQUESTS_PER_DOMAIN = 16
 #CONCURRENT_REQUESTS_PER_IP = 16
@@ -51,12 +53,15 @@ DEFAULT_REQUEST_HEADERS = {
 #SPIDER_MIDDLEWARES = {
 #    'trulia_scraper.middlewares.TruliaScraperSpiderMiddleware': 543,
 #}
-
+from scrapy.downloadermiddlewares.httpproxy import HttpProxyMiddleware
 # Enable or disable downloader middlewares
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
-#DOWNLOADER_MIDDLEWARES = {
-#    'trulia_scraper.middlewares.TruliaScraperDownloaderMiddleware': 543,
-#}
+DOWNLOADER_MIDDLEWARES = {
+    'scrapy.downloadermiddlewares.httpproxy.HttpProxyMiddleware': 110,
+    'trulia_scraper.middlewares.CustomProxyMiddleware': 100,
+    # 'trulia_scraper.middlewares.TruliaScraperDownloaderMiddleware': 543,
+
+}
 
 # Enable or disable extensions
 # See https://docs.scrapy.org/en/latest/topics/extensions.html
