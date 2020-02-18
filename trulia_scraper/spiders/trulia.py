@@ -14,17 +14,23 @@ from w3lib.http import basic_auth_header
 
 class TruliaSpider(scrapy.Spider):
     name = 'trulia'
-    proxy = 'http://zproxy.lum-superproxy.io:22225'
+    proxy = 'https://lum-customer-hl_00eb694c-zone-static:63hv8ubbyc8t@zproxy.lum-superproxy.io:22225'
     allowed_domains = ['trulia.com']
-    custom_settings = {'FEED_URI': os.path.join(os.path.dirname(closest_scrapy_cfg()), 'data/data_for_sale_%(state)s_%(city)s_%(time)s.jl'),
-                       'FEED_FORMAT': 'csv'}
+    custom_settings = {
+        'FEED_URI': os.path.join(os.path.dirname(closest_scrapy_cfg()), 'data/data_for_sale_%(state)s_%(city)s_%(time)s.jl'),
+        'FEED_FORMAT': 'csv',
+        'DOWNLOAD_DELAY': '0.5'
+    }
 
-    def __init__(self, state='IA', city='Waukee', zipcode='50263', *args, **kwargs):
+    def __init__(self, state='IA', city='Adel', zipcode='50003', *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.state = state
         self.city = city
-        self.start_urls = [f'http://trulia.com/{state}/{city}']
-        self.le = LinkExtractor(allow=r'^https://www.trulia.com/property')
+        self.start_urls = [f'http://trulia.com/{state}/{city}/{zipcode}']
+        self.le = LinkExtractor(allow=[r'^https://www.trulia.com/property',
+                                       r'^https://www.trulia.com/p/ia/',
+                                       r'^https://www.trulia.com/builder-community/',
+                                       ])
 
     def parse(self, response):
         pages_number = self.get_number_of_pages_to_scrape(response)
@@ -44,12 +50,13 @@ class TruliaSpider(scrapy.Spider):
 
     def parse_index_page(self, response):
         for link in self.le.extract_links(response):
+            print(link.url)
             yield scrapy.Request(url=link.url,
                                  callback=self.parse_property_page,
                                  # meta={
                                  #     'proxy': self.proxy,
                                  # },
-            )
+                                )
 
     def parse_agents(self, response):
         item = response.meta['it']
@@ -107,9 +114,13 @@ class TruliaSpider(scrapy.Spider):
             item['property_tax_assessment_year'] = home_details['taxes']['highlightedAssessments']['year']
         except TypeError:
             item['property_tax_assessment_year'] = ''
+        except KeyError:
+            item['property_tax_assessment_year'] = ''
         try:
             item['property_tax'] = home_details['taxes']['highlightedAssessments']['taxValue']['formattedPrice']
         except TypeError:
+            item['property_tax'] = ''
+        except KeyError:
             item['property_tax'] = ''
         try:
             assessments = home_details['taxes']['highlightedAssessments']['assessments']
@@ -121,9 +132,14 @@ class TruliaSpider(scrapy.Spider):
         except TypeError:
             item['property_tax_assessment_land'] = ''
             item['property_tax_assessment_improvements'] = ''
+        except KeyError:
+            item['property_tax_assessment_land'] = ''
+            item['property_tax_assessment_improvements'] = ''
         try:
             item['property_tax_assessment_total'] = home_details['taxes']['highlightedAssessments']['totalAssessment']['formattedPrice']
         except TypeError:
+            item['property_tax_assessment_total'] = ''
+        except KeyError:
             item['property_tax_assessment_total'] = ''
         # property_tax_market_value =
 
